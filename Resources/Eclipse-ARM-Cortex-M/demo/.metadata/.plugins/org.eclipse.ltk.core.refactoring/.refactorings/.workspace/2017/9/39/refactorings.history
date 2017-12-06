@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Delete resource &apos;blinky-STM32F4_NUCLEO&apos;" deleteContents="true" description="Delete resource &apos;blinky-STM32F4_NUCLEO&apos;" element1="/blinky-STM32F4_NUCLEO" flags="7" id="org.eclipse.ltk.core.refactoring.delete.resources" resources="1" stamp="1506321705258"/>
+</session>
