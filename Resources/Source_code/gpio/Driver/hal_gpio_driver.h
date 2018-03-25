@@ -27,7 +27,7 @@
 /* GPIO pull up/pull dwn  selection values */
 #define GPIO_PIN_NO_PULL_PUSH                          ( (uint32_t)0x00 )
 #define GPIO_PIN_PULL_UP                               ( (uint32_t)0x01 )
-#define GPIO_PIN_PULL_DOWN                             ( (uint32_t)0x11 )
+#define GPIO_PIN_PULL_DOWN                             ( (uint32_t)0x02 )
 
 
 /* gpio port address */
