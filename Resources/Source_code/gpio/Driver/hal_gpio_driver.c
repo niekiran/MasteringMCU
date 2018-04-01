@@ -10,7 +10,9 @@
 	*/
 void hal_gpio_configure_pin_mode(GPIO_TypeDef *GPIOx, uint16_t pin_no, uint32_t mode)
 {
-	 GPIOx->MODER   |= (mode << ( 2 * pin_no));
+	 
+	GPIOx->MODER   &= ~(0x03 << ( 2 * pin_no));
+	GPIOx->MODER   |= (mode << ( 2 * pin_no));
 }
 
 /**
