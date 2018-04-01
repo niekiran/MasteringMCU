@@ -154,8 +154,12 @@ void hal_spi_configure_nss_slave(SPI_TypeDef *SPIx, uint32_t ssm_enable)
 	*/
 void hal_spi_configure_baudrate(SPI_TypeDef *SPIx, uint32_t pre_scalar_value)
 {
-		SPIx->CR1 |= pre_scalar_value;
+        if(pre_scalar_value > 7 )
+            SPIx->CR1 |= (0x00 << 3); //if pre_scalar_value > 7,then use default . that is 0
+        else
+            SPIx->CR1 |= (pre_scalar_value << 3);
 }
+
 
  /**
 	* @brief  Configures SPI direction
