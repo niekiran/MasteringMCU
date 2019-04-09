@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename resource &apos;stm32f4xx_drivers/src/005buttin_interrupt.c&apos; to &apos;005button_interrupt.c&apos;" description="Rename resource &apos;005buttin_interrupt.c&apos;" flags="7" id="org.eclipse.ltk.core.refactoring.rename.resource" input="src/005buttin_interrupt.c" name="005button_interrupt.c" stamp="1549087600065" updateReferences="true"/>
+</session>

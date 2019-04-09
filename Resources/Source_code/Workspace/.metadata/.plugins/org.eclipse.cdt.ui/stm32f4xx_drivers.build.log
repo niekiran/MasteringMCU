@@ -1,0 +1,7 @@
+11:26:23 **** Clean-only build of configuration Debug for project stm32f4xx_drivers ****
+make -j4 clean 
+rm -rf *
+ 
+
+11:26:25 Build Finished (took 1s.909ms)
+

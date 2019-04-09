@@ -1,0 +1,807 @@
+
+
+#include "stm32f407xx_usart_driver.h"
+
+/*********************************************************************
+ * @fn      		  - RCC_GetPCLK1Value
+ *
+ * @brief             -
+ *
+ * @param[in]         -
+ * @param[in]         -
+ * @param[in]         -
+ *
+ * @return            -
+ *
+ * @Note              -
+
+ */
+uint32_t RCC_GetPCLK1Value(void)
+{
+	uint32_t SystemClock=0,tmp,pclk1;
+	uint8_t clk_src = ( RCC->CFGR >> 2) & 0X3;
+
+	uint8_t ahbp,apb1p;
+
+	if(clk_src == 0)
+	{
+		SystemClock = 16000000;
+	}else
+	{
+		SystemClock = 8000000;
+	}
+	tmp = (RCC->CFGR >> 4 ) & 0xF;
+
+	if(tmp < 0x08)
+	{
+		ahbp = 1;
+	}else
+	{
+       ahbp = AHB_PreScaler[tmp-8];
+	}
+
+	tmp = (RCC->CFGR >> 10 ) & 0x7;
+	if(tmp < 0x04)
+	{
+		apb1p = 1;
+	}else
+	{
+		apb1p = APB1_PreScaler[tmp-4];
+	}
+
+	pclk1 = (SystemClock / ahbp )/ apb1p;
+
+	return pclk1;
+}
+
+/*********************************************************************
+ * @fn      		  - RCC_GetPCLK2Value
+ *
+ * @brief             -
+ *
+ * @param[in]         -
+ * @param[in]         -
+ * @param[in]         -
+ *
+ * @return            -
+ *
+ * @Note              -
+
+ */
+uint32_t RCC_GetPCLK2Value(void)
+{
+	uint32_t SystemClock=0,tmp,pclk2;
+	uint8_t clk_src = ( RCC->CFGR >> 2) & 0X3;
+
+	uint8_t ahbp,apb2p;
+
+	if(clk_src == 0)
+	{
+		SystemClock = 16000000;
+	}else
+	{
+		SystemClock = 8000000;
+	}
+	tmp = (RCC->CFGR >> 4 ) & 0xF;
+
+	if(tmp < 0x08)
+	{
+		ahbp = 1;
+	}else
+	{
+       ahbp = AHB_PreScaler[tmp-8];
+	}
+
+	tmp = (RCC->CFGR >> 13 ) & 0x7;
+	if(tmp < 0x04)
+	{
+		apb2p = 1;
+	}else
+	{
+		apb2p = APB1_PreScaler[tmp-4];
+	}
+
+	pclk2 = (SystemClock / ahbp )/ apb2p;
+
+	return pclk2;
+}
+
+/*********************************************************************
+ * @fn      		  - USART_Init
+ *
+ * @brief             -
+ *
+ * @param[in]         -
+ * @param[in]         -
+ * @param[in]         -
+ *
+ * @return            -
+ *
+ * @Note              -
+
+ */
+void USART_Init(USART_Handle_t *pUSARTHandle)
+{
+
+	uint32_t tempreg=0;
+	//configure the CR1
+
+	USART_GPIOInit();
+
+	//enable the clock
+	if ( pUSARTHandle->USART_Config.USART_Mode == USART_MODE_ONLY_RX)
+	{
+		tempreg|= (1 <<  USART_CR1_RE);
+	}else if (pUSARTHandle->USART_Config.USART_Mode == USART_MODE_ONLY_TX)
+	{
+		tempreg |= ( 1 << USART_CR1_TE );
+
+	}else if (pUSARTHandle->USART_Config.USART_Mode == USART_MODE_TXRX)
+	{
+		tempreg |= ( ( 1 << USART_CR1_TE) | ( 1 << USART_CR1_RE) );
+	}
+
+	tempreg |= pUSARTHandle->USART_Config.USART_WordLength << USART_CR1_M ;
+
+	if ( pUSARTHandle->USART_Config.USART_ParityControl == USART_PARITY_EN_EVEN)
+	{
+		//enable the partiy
+		tempreg |= ( 1 << USART_CR1_PCE);
+
+		//by default it will be even parity
+
+	}else if (pUSARTHandle->USART_Config.USART_ParityControl == USART_PARITY_EN_ODD )
+	{
+		//enable the partiy
+	    tempreg |= ( 1 << USART_CR1_PCE);
+
+	    //enable odd parity
+	    tempreg |= ( 1 << USART_CR1_PS);
+
+	}else
+	{
+		//keep parity disable
+		 tempreg |= ( 1 << USART_CR1_PS);
+	}
+
+	pUSARTHandle->pUSARTx->CR1 = tempreg;
+
+	tempreg=0;
+
+	//now lets do CR2 inits.
+	tempreg |= pUSARTHandle->USART_Config.USART_NoOfStopBits;
+
+	pUSARTHandle->pUSARTx->CR2 = tempreg;
+
+	tempreg=0;
+	tempreg |= pUSARTHandle->USART_Config.USART_HWFlowControl;
+
+
+	pUSARTHandle->pUSARTx->CR3 = tempreg;
+
+	//baudrate config
+	USART_SetBaudRate(pUSARTHandle->pUSARTx,pUSARTHandle->USART_Config.USART_Baud);
+
+}
+
+/*********************************************************************
+ * @fn      		  - USART_GPIOInit
+ *
+ * @brief             -
+ *
+ * @param[in]         -
+ * @param[in]         -
+ * @param[in]         -
+ *
+ * @return            -
+ *
+ * @Note              -
+
+ */
+__weak void USART_GPIOInit(USART_Handle_t *pUSARTHandle)
+{
+
+	GPIO_Handle_t uart_tx, uart_rx;
+
+	uart_tx.pGPIOx = GPIOA;
+	uart_tx.GPIO_PinConfig.GPIO_PinMode = GPIO_MODE_ALTFUN;
+	uart_tx.GPIO_PinConfig.GPIO_PinOPType = GPIO_OP_PP;
+	uart_tx.GPIO_PinConfig.GPIO_PinNumber  = GPIO_PIN_NO_2; //uart_tx
+	uart_tx.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_PU;
+	uart_tx.GPIO_PinConfig.GPIO_PinSpeed = GPIO_SPEED_FAST;
+
+	GPIO_Init(&uart_tx);
+
+	uart_rx.pGPIOx = GPIOA;
+	uart_rx.GPIO_PinConfig.GPIO_PinMode = GPIO_MODE_ALTFUN;
+	uart_rx.GPIO_PinConfig.GPIO_PinOPType = GPIO_OP_PP;
+	uart_rx.GPIO_PinConfig.GPIO_PinNumber  = GPIO_PIN_NO_3; //uart_tx
+	uart_rx.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_PU;
+	uart_rx.GPIO_PinConfig.GPIO_PinSpeed = GPIO_SPEED_FAST;
+	GPIO_Init(&uart_rx);
+
+
+}
+
+/*********************************************************************
+ * @fn      		  - USART_EnableOrDisable
+ *
+ * @brief             -
+ *
+ * @param[in]         -
+ * @param[in]         -
+ * @param[in]         -
+ *
+ * @return            -
+ *
+ * @Note              -
+
+ */
+void USART_EnableOrDisable(USART_RegDef_t *pUSARTx, State_t Cmd)
+{
+	if(Cmd == ENABLE)
+	{
+		pUSARTx->CR1 |= (1 << 13);
+	}else
+	{
+		pUSARTx->CR1 &= ~(1 << 13);
+	}
+
+}
+
+
+/*********************************************************************
+ * @fn      		  - USART_GetFlagStatus
+ *
+ * @brief             -
+ *
+ * @param[in]         -
+ * @param[in]         -
+ * @param[in]         -
+ *
+ * @return            -
+ *
+ * @Note              -
+
+ */
+FlagStatus_t USART_GetFlagStatus(USART_RegDef_t *pUSARTx, uint16_t StatusFlagName)
+{
+    if(pUSARTx->SR & StatusFlagName)
+    {
+    	return SET;
+    }
+
+   return RESET;
+}
+
+/*********************************************************************
+ * @fn      		  - USART_SendData
+ *
+ * @brief             -
+ *
+ * @param[in]         -
+ * @param[in]         -
+ * @param[in]         -
+ *
+ * @return            -
+ *
+ * @Note              -
+
+ */
+void USART_SendData(USART_Handle_t *pUSARTHandle, uint8_t *pTxBuffer, uint8_t Len)
+{
+
+	for(uint32_t i = 0 ; i < Len; i++)
+	{
+		while(! USART_GetFlagStatus(pUSARTHandle->pUSARTx,USART_SR_TXE_Bit_Mask));
+		pUSARTHandle->pUSARTx->DR = *pTxBuffer;
+		pTxBuffer++;
+	}
+	//wait till TC is set
+	while( ! USART_GetFlagStatus(pUSARTHandle->pUSARTx,USART_SR_TC_Bit_Mask));
+}
+
+
+/*********************************************************************
+ * @fn      		  - USART_ReceiveData
+ *
+ * @brief             -
+ *
+ * @param[in]         -
+ * @param[in]         -
+ * @param[in]         -
+ *
+ * @return            -
+ *
+ * @Note              -
+
+ */
+void USART_ReceiveData(USART_Handle_t *pUSARTHandle,uint8_t *pRxBuffer, uint8_t Len)
+{
+	for(uint32_t i = 0 ; i < Len; i++)
+	{
+		while(! USART_GetFlagStatus(pUSARTHandle->pUSARTx,USART_SR_RXNE_Bit_Mask));
+		*pRxBuffer = pUSARTHandle->pUSARTx->DR;
+		pRxBuffer++;
+	}
+
+
+}
+
+
+/*********************************************************************
+ * @fn      		  - USART_SendDataWithIT
+ *
+ * @brief             -
+ *
+ * @param[in]         -
+ * @param[in]         -
+ * @param[in]         -
+ *
+ * @return            -
+ *
+ * @Note              -
+
+ */
+uint8_t USART_SendDataWithIT(USART_Handle_t *pUSARTHandle,uint8_t *pTxBuffer, uint8_t Len)
+{
+	uint8_t txstate = pUSARTHandle->TxBusyState;
+
+	if(txstate != USART_BUSY_IN_TX)
+	{
+		pUSARTHandle->TxLen = Len;
+		pUSARTHandle->TxSize = Len;
+		pUSARTHandle->pTxBuffer = pTxBuffer;
+		pUSARTHandle->TxBusyState = USART_BUSY_IN_TX;
+
+		//enable the TXE and TC interrupt
+		USART_EnableInterrupts(pUSARTHandle->pUSARTx,USART_CR1_TXEIE_Bit_Mask);
+
+		USART_EnableInterrupts(pUSARTHandle->pUSARTx,USART_CR1_TCIE_Bit_Mask);
+
+	}
+
+	return txstate;
+
+}
+
+/*********************************************************************
+ * @fn      		  - USART_SetBaudRate
+ *
+ * @brief             -
+ *
+ * @param[in]         -
+ * @param[in]         -
+ * @param[in]         -
+ *
+ * @return            -
+ *
+ * @Note              -
+
+ */
+void USART_SetBaudRate(USART_RegDef_t *pUSARTx, uint32_t BaudRate)
+{
+
+	uint32_t PCLKx;
+
+	float usartdiv;
+
+	uint32_t integerpart,fraction;
+
+   uint32_t tempreg=0;
+
+   if(pUSARTx == USART1 || pUSARTx == USART6)
+   {
+	   //apb2
+	   PCLKx = RCC_GetPCLK2Value();
+   }else
+   {
+	   PCLKx = RCC_GetPCLK1Value();
+   }
+
+   if(pUSARTx->CR1 & USART_CR1_OVER8_Bit_Mask)
+   {
+	   //OVER8 = 1 // sample by 8
+	   usartdiv = PCLKx / (8 * BaudRate);
+   }else
+   {
+	   //sample by 16
+	   usartdiv = PCLKx / (16 * BaudRate); //416.687589
+   }
+
+   integerpart = usartdiv; //416
+
+   tempreg |= integerpart << 4;
+
+   fraction = ((usartdiv * 100 ) - (integerpart * 100));
+   if(pUSARTx->CR1 & USART_CR1_OVER8_Bit_Mask)
+    {
+ 	   //OVER8 = 1 // sample by 8
+	   fraction = ((( fraction * 8)+ 50) / 100)& ((uint8_t)0x07);
+
+    }else
+    {
+ 	   //sample by 16
+    	fraction = ((( fraction * 16)+ 50) / 100) & ((uint8_t)0x0F);
+
+    }
+
+   tempreg |=fraction;
+
+   pUSARTx->BRR = tempreg;
+
+#if 0
+	uint32_t PCLKx;
+
+	uint32_t usartdiv;
+
+	uint32_t integerpart,fraction;
+
+  uint32_t tempreg=0;
+
+  if(pUSARTx == USART1 || pUSARTx == USART6)
+  {
+	   //apb2
+	   PCLKx = RCC_GetPCLK2Value();
+  }else
+  {
+	   PCLKx = RCC_GetPCLK1Value();
+  }
+
+  if(pUSARTx->CR1 & USART_CR1_OVER8_Bit_Mask)
+  {
+	   //OVER8 = 1 // sample by 8
+	   usartdiv = ((25 * PCLKx) / (2 *BaudRate));
+  }else
+  {
+	   //sample by 16
+	   usartdiv = ((25 * PCLKx) / (4 *BaudRate));
+  }
+
+   integerpart = usartdiv/100;
+
+  tempreg |= integerpart << 4;
+
+  fraction = (usartdiv - (integerpart * 100));
+  if(pUSARTx->CR1 & USART_CR1_OVER8_Bit_Mask)
+   {
+	   //OVER8 = 1 // sample by 8
+	   fraction = ((( fraction * 8)+ 50) / 100)& ((uint8_t)0x07);
+
+   }else
+   {
+	   //sample by 16
+   	fraction = ((( fraction * 16)+ 50) / 100) & ((uint8_t)0x0F);
+
+   }
+
+  tempreg |=fraction;
+
+  pUSARTx->BRR = tempreg;
+
+#endif
+}
+/*********************************************************************
+ * @fn      		  - USART_ReceiveDataWithIT
+ *
+ * @brief             -
+ *
+ * @param[in]         -
+ * @param[in]         -
+ * @param[in]         -
+ *
+ * @return            -
+ *
+ * @Note              -
+
+ */
+uint8_t USART_ReceiveDataWithIT(USART_Handle_t *pUSARTHandle,uint8_t *pRxBuffer, uint8_t Len)
+{
+	uint8_t rxstate = pUSARTHandle->RxBusyState;
+
+	if(rxstate != USART_BUSY_IN_RX)
+	{
+		pUSARTHandle->RxLen = Len;
+		pUSARTHandle->RxSize = Len;
+		pUSARTHandle->pRxBuffer = pRxBuffer;
+		pUSARTHandle->RxBusyState = USART_BUSY_IN_RX;
+
+		//enable the TXE and TC interrupt
+		USART_EnableInterrupts(pUSARTHandle->pUSARTx,USART_CR1_RXNEIE_Bit_Mask);
+
+	}
+
+	return rxstate;
+
+}
+
+
+/*********************************************************************
+ * @fn      		  - USART_ClearFlag
+ *
+ * @brief             -
+ *
+ * @param[in]         -
+ * @param[in]         -
+ * @param[in]         -
+ *
+ * @return            -
+ *
+ * @Note              - Applicable to only USART_CTS_FLAG , USART_LBD_FLAG
+ * USART_TC_FLAG,USART_TC_FLAG flags
+ *
+
+ */
+
+void USART_ClearFlag(USART_RegDef_t *pUSARTx, uint16_t StatusFlagName)
+{
+	pUSARTx->SR &= ~(StatusFlagName);
+
+}
+
+
+/*********************************************************************
+ * @fn      		  - USART_EnableInterrupts
+ *
+ * @brief             -
+ *
+ * @param[in]         -
+ * @param[in]         -
+ * @param[in]         -
+ *
+ * @return            -
+ *
+ * @Note              -
+
+ */
+void USART_EnableInterrupts(USART_RegDef_t *pUSARTx, uint32_t IEControlbit)
+{
+	if( (IEControlbit == USART_CR3_CTSIE_Bit_Mask) || (IEControlbit == USART_CR3_EIE_Bit_Mask) )
+	{
+		pUSARTx->CR3 |= IEControlbit;
+	}else
+	{
+		pUSARTx->CR1 |= IEControlbit;
+	}
+
+}
+
+
+void USART_IRQConfig(uint8_t IRQNumber, uint8_t IRQPriority,uint8_t IRQEnDi)
+{
+
+	uint8_t pr_col ;
+	uint8_t pr_row ;
+
+
+	pr_row = IRQNumber /4;
+	pr_col = IRQNumber % 4;
+
+	if(IRQEnDi == ENABLE)
+	{
+		*NVIC_PR_BASE_ADDR(pr_row) &= ~( 0XF << (pr_col * 4) );
+		*NVIC_PR_BASE_ADDR(pr_row) |= ( IRQPriority << (pr_col * 4) );
+
+		if(IRQNumber <= 31)
+		{
+			*NVIC_ISER0 |= (1 << IRQNumber);
+
+		}else if(IRQNumber > 31 && IRQNumber < 64 )
+		{
+			*NVIC_ISER1 |= (1 << (IRQNumber % 32));
+		}
+		else if(IRQNumber >= 64 && IRQNumber < 96 )
+		{
+			*NVIC_ISER2 |= (1 << (IRQNumber % 64));
+		}
+	}else
+	{
+		if(IRQNumber <= 31)
+		{
+			*NVIC_ICER0 |= (1 << IRQNumber);
+		}else if(IRQNumber > 31 && IRQNumber < 64 )
+		{
+			*NVIC_ICER1 |= (1 << (IRQNumber % 32));
+		}
+		else if(IRQNumber >= 6 && IRQNumber < 96 )
+		{
+			*NVIC_ICER2 |= (1 << (IRQNumber % 64));
+		}
+	}
+
+}
+/*********************************************************************
+ * @fn      		  - USART_DisableInterrupts
+ *
+ * @brief             -
+ *
+ * @param[in]         -
+ * @param[in]         -
+ * @param[in]         -
+ *
+ * @return            -
+ *
+ * @Note              -
+
+ */
+void USART_DisableInterrupts(USART_RegDef_t *pUSARTx, uint32_t IEControlbit)
+{
+	if( (IEControlbit == USART_CR3_CTSIE_Bit_Mask) || (IEControlbit == USART_CR3_EIE_Bit_Mask) )
+	{
+		pUSARTx->CR3 &= ~IEControlbit;
+	}else
+	{
+		pUSARTx->CR1 &= ~IEControlbit;
+	}
+}
+
+
+/*********************************************************************
+ * @fn      		  - USART_IRQHandler
+ *
+ * @brief             -
+ *
+ * @param[in]         -
+ * @param[in]         -
+ * @param[in]         -
+ *
+ * @return            -
+ *
+ * @Note              -
+
+ */
+void USART_IRQHandler(USART_Handle_t *pUSARTHandle)
+{
+	uint32_t temp1 , temp2;
+
+	temp1 = pUSARTHandle->pUSARTx->SR & USART_SR_TC_Bit_Mask;
+	temp2 = pUSARTHandle->pUSARTx->CR1 & USART_CR1_TCIE_Bit_Mask;
+
+	if(temp1 == SET && temp2 == SET)
+	{
+		//this interrupt is because of TC
+		//close tx communication and call application callback
+		if ( pUSARTHandle->TxBusyState == USART_BUSY_IN_TX)
+		{
+			pUSARTHandle->TxBusyState = USART_READY;
+			USART_DisableInterrupts(pUSARTHandle->pUSARTx,USART_CR1_TCIE_Bit_Mask);
+			USART_ApplicationEventCallback(pUSARTHandle,USART_EVENT_TX_CMPLT);
+		}
+	}
+
+	temp1 = pUSARTHandle->pUSARTx->SR & USART_SR_TXE_Bit_Mask;
+	temp2 = pUSARTHandle->pUSARTx->CR1 & USART_CR1_TXEIE_Bit_Mask;
+
+
+	if(temp1 == SET && temp2 == SET)
+	{
+		//this interrupt is because of txe
+		if(pUSARTHandle->TxBusyState == USART_BUSY_IN_TX)
+		{
+			//TXE is set so send data
+			if(pUSARTHandle->TxLen > 0)
+			{
+				pUSARTHandle->pUSARTx->DR = *pUSARTHandle->pTxBuffer;
+				pUSARTHandle->pTxBuffer++;
+				pUSARTHandle->TxLen--;
+			}else
+			{
+				//disable the TXEIE
+				USART_DisableInterrupts(pUSARTHandle->pUSARTx,USART_CR1_TXEIE_Bit_Mask);
+			}
+		}
+	}
+
+	temp1 = pUSARTHandle->pUSARTx->SR & USART_SR_CTS_Bit_Mask;
+	temp2 = pUSARTHandle->pUSARTx->CR3 & USART_CR3_CTSE_Bit_Mask;
+
+
+	if(temp1 == SET && temp2 == SET)
+	{
+		//this interrupt is because of cts
+		USART_ApplicationEventCallback(pUSARTHandle,USART_EVENT_CTS);
+	}
+
+	temp1 = pUSARTHandle->pUSARTx->SR & USART_SR_IDLE_Bit_Mask;
+	temp2 = pUSARTHandle->pUSARTx->CR1 & USART_CR1_IDLEIE_Bit_Mask;
+
+
+	if(temp1 == SET && temp2 == SET)
+	{
+		//this interrupt is because of idle
+		USART_ApplicationEventCallback(pUSARTHandle,USART_EVENT_IDLE);
+	}
+
+#if 0
+	temp1 = pUSARTHandle->pUSARTx->SR & USART_SR_ORE_BIT_Mask;
+	temp2 = pUSARTHandle->pUSARTx->CR1 & USART_CR1_RXNEIE_BIT_Mask;
+
+
+	if(temp1 == SET && temp2 == SET)
+	{
+		//this interrupt is because of ore
+		USART_ApplicationEventCallback(pUSARTHandle,USART_EVENT_ORE);
+	}
+#endif
+
+	temp1 = pUSARTHandle->pUSARTx->SR & USART_SR_RXNE_Bit_Mask;
+	temp2 = pUSARTHandle->pUSARTx->CR1 & USART_CR1_RXNEIE_Bit_Mask;
+
+
+	if(temp1 == SET && temp2 == SET)
+	{
+		//this interrupt is because of rxne
+		//this interrupt is because of txe
+		if(pUSARTHandle->TxBusyState == USART_BUSY_IN_RX)
+		{
+			//TXE is set so send data
+			if(pUSARTHandle->RxLen > 0)
+			{
+				*pUSARTHandle->pRxBuffer = pUSARTHandle->pUSARTx->DR;
+				pUSARTHandle->pRxBuffer++;
+				pUSARTHandle->RxLen--;
+			}else
+			{
+				//disable the rxne
+				USART_DisableInterrupts(pUSARTHandle->pUSARTx,USART_CR1_RXNEIE_Bit_Mask);
+				pUSARTHandle->RxBusyState = USART_READY;
+				USART_ApplicationEventCallback(pUSARTHandle,USART_EVENT_RX_CMPLT);
+			}
+		}
+	}
+
+
+	temp1 = pUSARTHandle->pUSARTx->SR & USART_SR_PE_Bit_Mask;
+	temp2 = pUSARTHandle->pUSARTx->CR1 & USART_CR1_PEIE_Bit_Mask;
+
+
+	if(temp1 == SET && temp2 == SET)
+	{
+		//this interrupt is because of pe
+		USART_ApplicationEventCallback(pUSARTHandle,USART_EVENT_PE);
+	}
+
+
+	temp2 =  pUSARTHandle->pUSARTx->CR3 & USART_CR3_EIE_Bit_Mask;
+
+	if(temp2 == SET)
+	{
+		temp1 = pUSARTHandle->pUSARTx->SR;
+		if(temp1 & USART_SR_FE_Bit_Mask)
+		{
+			USART_ApplicationEventCallback(pUSARTHandle,USART_ERREVENT_FE);
+		}
+
+		if(temp1 & USART_SR_NE_Bit_Mask)
+		{
+			USART_ApplicationEventCallback(pUSARTHandle,USART_ERREVENT_NE);
+		}
+
+		if(temp1 & USART_SR_ORE_Bit_Mask)
+		{
+			USART_ApplicationEventCallback(pUSARTHandle,USART_ERREVENT_ORE);
+		}
+	}
+
+
+}
+
+
+/*********************************************************************
+ * @fn      		  - USART_ApplicationEventCallback
+ *
+ * @brief             -
+ *
+ * @param[in]         -
+ * @param[in]         -
+ * @param[in]         -
+ *
+ * @return            -
+ *
+ * @Note              -
+
+ */
+void USART_ApplicationEventCallback(USART_Handle_t *pUSARTHandle,USART_Events_t event)
+{
+
+}

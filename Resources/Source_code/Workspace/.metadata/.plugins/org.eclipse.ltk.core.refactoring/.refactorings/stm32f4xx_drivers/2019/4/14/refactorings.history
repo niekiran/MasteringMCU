@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename resource &apos;stm32f4xx_drivers/src/016uart_tx_it.c&apos; to &apos;016uart_case.c&apos;" description="Rename resource &apos;016uart_tx_it.c&apos;" flags="7" id="org.eclipse.ltk.core.refactoring.rename.resource" input="src/016uart_tx_it.c" name="016uart_case.c" stamp="1554129558661" updateReferences="true"/>
+</session>

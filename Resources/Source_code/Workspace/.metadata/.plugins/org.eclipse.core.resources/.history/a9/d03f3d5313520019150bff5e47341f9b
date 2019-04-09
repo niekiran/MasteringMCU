@@ -1,0 +1,16 @@
+/*
+ * clock.h
+ *
+ *  Created on: Mar 29, 2019
+ *      Author: admin
+ */
+
+#ifndef INC_CLOCK_H_
+#define INC_CLOCK_H_
+
+#include "stm32f407xx.h"
+
+
+uint32_t RCC_GetPCLK1Value(void);
+
+#endif /* INC_CLOCK_H_ */

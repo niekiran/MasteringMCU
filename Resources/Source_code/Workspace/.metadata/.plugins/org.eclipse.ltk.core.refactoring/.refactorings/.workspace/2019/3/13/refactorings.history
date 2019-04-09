@@ -1,0 +1,3 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">&#x0A;<refactoring comment="Delete resource &apos;stm32f4xx_drivers/drivers/inc/clock.h&apos;" deleteContents="false" description="Delete resource &apos;stm32f4xx_drivers/drivers/inc/clock.h&apos;" element1="/stm32f4xx_drivers/drivers/inc/clock.h" flags="7" id="org.eclipse.ltk.core.refactoring.delete.resources" resources="1" stamp="1553857856605"/>&#x0A;<refactoring comment="Delete resource &apos;stm32f4xx_drivers/drivers/src/clock.c&apos;" deleteContents="false" description="Delete resource &apos;stm32f4xx_drivers/drivers/src/clock.c&apos;" element1="/stm32f4xx_drivers/drivers/src/clock.c" flags="7" id="org.eclipse.ltk.core.refactoring.delete.resources" resources="1" stamp="1553857861974"/>
+</session>
