@@ -729,10 +729,8 @@ void USART_IRQHandling(USART_Handle_t *pUSARTHandle)
 	if(temp1 && temp2 )
 	{
 		//this interrupt is because of rxne
-		//this interrupt is because of txe
 		if(pUSARTHandle->RxBusyState == USART_BUSY_IN_RX)
 		{
-			//TXE is set so send data
 			if(pUSARTHandle->RxLen > 0)
 			{
 				//Check the USART_WordLength to decide whether we are going to receive 9bit of data in a frame or 8 bit
