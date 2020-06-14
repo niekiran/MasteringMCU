@@ -133,28 +133,21 @@ void GPIO_Init(GPIO_Handle_t *pGPIOHandle)
 		EXTI->IMR |= 1 << pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber;
 	}
 
-	temp = 0;
-
 	//2. configure the speed
 	temp = (pGPIOHandle->GPIO_PinConfig.GPIO_PinSpeed << ( 2 * pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber) );
 	pGPIOHandle->pGPIOx->OSPEEDR &= ~( 0x3 << ( 2 * pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber)); //clearing
 	pGPIOHandle->pGPIOx->OSPEEDR |= temp;
-
-	temp = 0;
 
 	//3. configure the pupd settings
 	temp = (pGPIOHandle->GPIO_PinConfig.GPIO_PinPuPdControl << ( 2 * pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber) );
 	pGPIOHandle->pGPIOx->PUPDR &= ~( 0x3 << ( 2 * pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber)); //clearing
 	pGPIOHandle->pGPIOx->PUPDR |= temp;
 
-	temp = 0;
 
 	//4. configure the optype
 	temp = (pGPIOHandle->GPIO_PinConfig.GPIO_PinOPType << pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber );
 	pGPIOHandle->pGPIOx->OTYPER &= ~( 0x1 << pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber); //clearing
 	pGPIOHandle->pGPIOx->OTYPER |= temp;
-
-	temp = 0;
 
 	//5. configure the alt functionality
 	if(pGPIOHandle->GPIO_PinConfig.GPIO_PinMode == GPIO_MODE_ALTFN)
