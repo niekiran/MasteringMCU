@@ -14,7 +14,7 @@ boolean ledState = HIGH;      // LED state flag.
 
 uint8_t dataBuff[255];
 
-uint8_t board_id[10] = "ARDUINOUNO";
+char board_id[10] = "ARDUINOUNO";
 
 #define NACK  0xA5
 #define ACK   0xF5
@@ -157,7 +157,8 @@ void loop()
     uint8_t pin = SPI_SlaveReceive(); 
     uint8_t val = digitalRead(pin);
     SPI_SlaveTransmit(val);
-    Serial.println("RCVD:COMMAND_LED_READ"); // print is defered in order not to hold the SPI communication
+    Serial.print("RCVD:COMMAND_LED_READ. LED pin val: "); // prints are defered in order not to hold the SPI communication
+    Serial.println(val);
     val = SPI_SlaveReceive(); //dummy read
     
   } else if (cmdOpcode == COMMAND_PRINT) {
@@ -181,7 +182,8 @@ void loop()
       SPI_SlaveTransmit(board_id[i]);
       SPI_SlaveReceive(); //dummy read
     }
-    Serial.println("RCVD:COMMAND_ID_READ");
+    Serial.print("RCVD:COMMAND_ID_READ. Board string sent: ");
+    Serial.println(board_id);
   }
   Serial.println("");
 }
