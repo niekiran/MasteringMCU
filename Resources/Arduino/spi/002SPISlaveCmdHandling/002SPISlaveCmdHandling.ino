@@ -68,8 +68,8 @@ void SPI_SlaveTransmit(uint8_t data)
   
   /* Wait for transmission complete */
   while(!(SPSR & (1<<SPIF)));
-  Serial.print("SPISlave sent byte: 0x");
-  Serial.println(data, HEX);
+//  Serial.print("SPISlave sent byte: 0x");
+//  Serial.println(data, HEX);
 }
   
 
@@ -108,7 +108,7 @@ void loop()
   byte data, cmdOpcode, len, ackOrNack = NACK;
   
   //1. wait until ss is low
-  Serial.println("\nSlave waiting for ss to go low");
+  Serial.println("Slave waiting for ss to go low");
   while(digitalRead(SS) );
   Serial.println("Slave ss is now low");
   
@@ -183,4 +183,5 @@ void loop()
     }
     Serial.println("RCVD:COMMAND_ID_READ");
   }
+  Serial.println("");
 }
