@@ -73,10 +73,6 @@ void loop()
   uint8_t dataLen8;
   //uint16_t dataLen16; // To support more than 255 bytes payload transfer in a single chunk. currently not in use.
   Serial.println("\nSlave waiting for SS to go low");
-//  Serial.print("SS pin:");
-//  Serial.print(String(SS, DEC));
-//  Serial.print(". Current pin value:");
-//  Serial.println(digitalRead(SS));
 
   while(digitalRead(SS));
   Serial.println("SS is now Low");
