@@ -75,7 +75,8 @@ void loop()
   Serial.println("\nSlave waiting for SS to go low");
 
   while(digitalRead(SS));
-  Serial.println("SS is now Low");
+  // Important !!! Avoid prints here! Enabling the print in the next line delays the slave Arduino and this cause it to miss data bytes sent from the master unless the master will add some delay between sending the length and the payload.
+  //Serial.println("SS is now Low"); 
 
   //1. read the length  
   //dataLen16 = (uint16_t)( SPI_SlaveReceive() | (SPI_SlaveReceive() << 8) );

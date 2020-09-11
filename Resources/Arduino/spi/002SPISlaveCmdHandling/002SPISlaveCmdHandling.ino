@@ -108,9 +108,10 @@ void loop()
   byte data, cmdOpcode, len, ackOrNack = NACK;
   
   //1. wait until ss is low
-  Serial.println("Slave waiting for ss to go low");
+  Serial.println("Slave waiting for SS to go low");
   while(digitalRead(SS) );
-  Serial.println("Slave ss is now low");
+  // Avoid prints here !!! It slows the slave and as a result received bytes will not be read.
+  //Serial.println("Slave's SS is now low (Slave was selected for communication)");
   
   //2. wait until rx buffer has a byte
   cmdOpcode = SPI_SlaveReceive();
