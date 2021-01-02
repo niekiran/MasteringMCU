@@ -16,27 +16,18 @@
 #define SPI_MOSI 11
 #define SPI_SS 10
 
-char dataBuff[500];
+#define MAX_I2C_PAYLOAD_LENGTH  500
+
+char dataBuff[MAX_I2C_PAYLOAD_LENGTH];
 //Initialize SPI slave.
 void SPI_SlaveInit(void) 
 { 
- #if 0 
   // Initialize SPI pins.
-  pinMode(SPI_SCK, INPUT);
-  pinMode(SPI_MOSI, INPUT);
-  pinMode(SPI_MISO, OUTPUT);
-  pinMode(SPI_SS, INPUT);
-  
-  // Enable SPI as slave.
-  SPCR = (1 << SPE);
- #endif 
-   // Initialize SPI pins.
   pinMode(SCK, INPUT);
   pinMode(MOSI, INPUT);
   pinMode(MISO, OUTPUT);
   pinMode(SS, INPUT);
-  //make SPI as slave
-  
+
   // Enable SPI as slave.
   SPCR = (1 << SPE);
 }
@@ -45,71 +36,67 @@ void SPI_SlaveInit(void)
 uint8_t SPI_SlaveReceive(void)
 {
   /* Wait for reception complete */
+  //Serial.println("in SPI_SlaveReceive - waiting for reception complete");
   while(!(SPSR & (1<<SPIF)));
+  //Serial.println("reception complete !!!");
   /* Return Data Register */
   return SPDR;
 }
 
-
-//sends one byte of data 
+//send one byte of data 
 void SPI_SlaveTransmit(char data)
 {
   /* Start transmission */
   SPDR = data;
-  
   /* Wait for transmission complete */
   while(!(SPSR & (1<<SPIF)));
 }
-  
+
 
 // The setup() function runs right after reset.
 void setup() 
 {
   // Initialize serial communication 
   Serial.begin(9600);
-  
+
   // Initialize SPI Slave.
   SPI_SlaveInit();
   
   Serial.println("Slave Initialized");
 }
- uint16_t dataLen = 0;
-  uint32_t i = 0;
+
+
 // The loop function runs continuously after setup().
 void loop() 
 {
+  uint32_t i;
+  uint8_t dataLen8;
+  //uint16_t dataLen16; // To support more than 255 bytes payload transfer in a single chunk. currently not in use.
+  Serial.println("\nSlave waiting for SS to go low");
 
- 
-  
-  Serial.println("Slave waiting for ss to go low");
-  while(digitalRead(SS) );
+  while(digitalRead(SS));
+  // Important !!! Avoid prints here! Enabling the print in the next line delays the slave Arduino and this cause it to miss data bytes sent from the master unless the master will add some delay between sending the length and the payload.
+  //Serial.println("SS is now Low"); 
 
- //  Serial.println("start");
-   
   //1. read the length  
-//  dataLen = (uint16_t)( SPI_SlaveReceive() | (SPI_SlaveReceive() << 8) );
+  //dataLen16 = (uint16_t)( SPI_SlaveReceive() | (SPI_SlaveReceive() << 8) );
   //Serial.println(String(dataLen,HEX));
- i = 0;
-  dataLen = SPI_SlaveReceive();
-  for(i = 0 ; i < dataLen ; i++ )
-  {
-    dataBuff[i] =  SPI_SlaveReceive();
+  dataLen8 = SPI_SlaveReceive();
+  //Serial.print("Received Data Len: ");
+  //Serial.println(String(dataLen8, DEC));
+  //Serial.println("Following will be the Received Data: ");
+
+  for(i = 0 ; i < dataLen8 ; i++ ) {
+    dataBuff[i] = SPI_SlaveReceive();
   }
-
-
-  //  Serial.println(String(i,HEX));
   dataBuff[i] = '\0';
-  
-  Serial.println("Rcvd:");
-  Serial.println(dataBuff);
-  Serial.print("Length:");
-  Serial.println(dataLen);
-  
- 
-    
- 
+
+  Serial.print("Rcvd: '");
+  Serial.print(dataBuff);
+  Serial.print("'. Length: ");
+  Serial.println(dataLen8);
+
+//  Serial.println("Slave waiting for ss to go high");
+//  while(!digitalRead(SS));
+//  Serial.println("SS HIGH\n\n");
 }
-
-
-   
-   
