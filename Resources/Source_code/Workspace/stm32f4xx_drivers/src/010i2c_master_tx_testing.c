@@ -25,16 +25,22 @@ I2C_Handle_t I2C1Handle;
 uint8_t some_data[] = "We are testing I2C master Tx\n";
 /*
  * PB6-> SCL
- * PB7 -> SDA
+ * PB9 or PB7 -> SDA
  */
 
 void I2C1_GPIOInits(void)
 {
 	GPIO_Handle_t I2CPins;
 
+	/*Note : Internal pull-up resistors are used */
+
 	I2CPins.pGPIOx = GPIOB;
 	I2CPins.GPIO_PinConfig.GPIO_PinMode = GPIO_MODE_ALTFN;
 	I2CPins.GPIO_PinConfig.GPIO_PinOPType = GPIO_OP_TYPE_OD;
+	/*
+	 * Note : In the below line use GPIO_NO_PUPD option if you want to use external pullup resistors, then you have to use 3.3K pull up resistors
+	 * for both SDA and SCL lines
+	 */
 	I2CPins.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_PIN_PU;
 	I2CPins.GPIO_PinConfig.GPIO_PinAltFunMode = 4;
 	I2CPins. GPIO_PinConfig.GPIO_PinSpeed = GPIO_SPEED_FAST;
@@ -45,7 +51,9 @@ void I2C1_GPIOInits(void)
 
 
 	//sda
-	I2CPins.GPIO_PinConfig.GPIO_PinNumber = GPIO_PIN_NO_7;
+	//Note : since we found a glitch on PB9 , you can also try with PB7
+	I2CPins.GPIO_PinConfig.GPIO_PinNumber = GPIO_PIN_NO_9;
+
 	GPIO_Init(&I2CPins);
 
 
@@ -65,7 +73,7 @@ void I2C1_Inits(void)
 
 void GPIO_ButtonInit(void)
 {
-	GPIO_Handle_t GPIOBtn,GpioLed;
+	GPIO_Handle_t GPIOBtn;
 
 	//this is btn gpio configuration
 	GPIOBtn.pGPIOx = GPIOA;
@@ -75,18 +83,6 @@ void GPIO_ButtonInit(void)
 	GPIOBtn.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_NO_PUPD;
 
 	GPIO_Init(&GPIOBtn);
-
-	//this is led gpio configuration
-	GpioLed.pGPIOx = GPIOD;
-	GpioLed.GPIO_PinConfig.GPIO_PinNumber = GPIO_PIN_NO_12;
-	GpioLed.GPIO_PinConfig.GPIO_PinMode = GPIO_MODE_OUT;
-	GpioLed.GPIO_PinConfig.GPIO_PinSpeed = GPIO_SPEED_FAST;
-	GpioLed.GPIO_PinConfig.GPIO_PinOPType = GPIO_OP_TYPE_OD;
-	GpioLed.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_NO_PUPD;
-
-	GPIO_PeriClockControl(GPIOD,ENABLE);
-
-	GPIO_Init(&GpioLed);
 
 }
 
@@ -114,7 +110,7 @@ int main(void)
 		delay();
 
 		//send some data to the slave
-		I2C_MasterSendData(&I2C1Handle,some_data,strlen((char*)some_data),SLAVE_ADDR);
+		I2C_MasterSendData(&I2C1Handle,some_data,strlen((char*)some_data),SLAVE_ADDR,0);
 	}
 
 }
