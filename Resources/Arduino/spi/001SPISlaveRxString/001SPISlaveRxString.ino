@@ -10,27 +10,18 @@
  
  */
 #include <SPI.h>
-#include<stdint.h>
+#include<stdint.h>  
 #define SPI_SCK 13
 #define SPI_MISO 12
 #define SPI_MOSI 11
 #define SPI_SS 10
 
 char dataBuff[500];
+
 //Initialize SPI slave.
 void SPI_SlaveInit(void) 
 { 
- #if 0 
   // Initialize SPI pins.
-  pinMode(SPI_SCK, INPUT);
-  pinMode(SPI_MOSI, INPUT);
-  pinMode(SPI_MISO, OUTPUT);
-  pinMode(SPI_SS, INPUT);
-  
-  // Enable SPI as slave.
-  SPCR = (1 << SPE);
- #endif 
-   // Initialize SPI pins.
   pinMode(SCK, INPUT);
   pinMode(MOSI, INPUT);
   pinMode(MISO, OUTPUT);
@@ -56,7 +47,6 @@ void SPI_SlaveTransmit(char data)
 {
   /* Start transmission */
   SPDR = data;
-  
   /* Wait for transmission complete */
   while(!(SPSR & (1<<SPIF)));
 }
@@ -67,29 +57,20 @@ void setup()
 {
   // Initialize serial communication 
   Serial.begin(9600);
-  
   // Initialize SPI Slave.
   SPI_SlaveInit();
-  
   Serial.println("Slave Initialized");
 }
- uint16_t dataLen = 0;
-  uint32_t i = 0;
+
 // The loop function runs continuously after setup().
 void loop() 
 {
-
- 
-  
+  uint32_t i;
+  uint16_t dataLen = 0;
   Serial.println("Slave waiting for ss to go low");
-  while(digitalRead(SS) );
+  while(digitalRead(SS));
 
- //  Serial.println("start");
-   
-  //1. read the length  
-//  dataLen = (uint16_t)( SPI_SlaveReceive() | (SPI_SlaveReceive() << 8) );
-  //Serial.println(String(dataLen,HEX));
- i = 0;
+  i = 0;
   dataLen = SPI_SlaveReceive();
   for(i = 0 ; i < dataLen ; i++ )
   {
@@ -104,10 +85,6 @@ void loop()
   Serial.println(dataBuff);
   Serial.print("Length:");
   Serial.println(dataLen);
-  
- 
-    
- 
 }
 
 

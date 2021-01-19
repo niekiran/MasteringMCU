@@ -9,7 +9,7 @@
 #include<string.h>
 #include "stm32f407xx.h"
 
-extern void initialise_monitor_handles();
+//extern void initialise_monitor_handles();
 
 //command codes
 #define COMMAND_LED_CTRL      		0x50
@@ -53,7 +53,7 @@ void SPI2_GPIOInits(void)
 	SPIPins.GPIO_PinConfig.GPIO_PinMode = GPIO_MODE_ALTFN;
 	SPIPins.GPIO_PinConfig.GPIO_PinAltFunMode = 5;
 	SPIPins.GPIO_PinConfig.GPIO_PinOPType = GPIO_OP_TYPE_PP;
-	SPIPins.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_PIN_PU;
+	SPIPins.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_NO_PUPD;
 	SPIPins.GPIO_PinConfig.GPIO_PinSpeed = GPIO_SPEED_FAST;
 
 	//SCLK
@@ -84,8 +84,7 @@ void SPI2_Inits(void)
 	SPI2handle.pSPIx = SPI2;
 	SPI2handle.SPIConfig.SPI_BusConfig = SPI_BUS_CONFIG_FD;
 	SPI2handle.SPIConfig.SPI_DeviceMode = SPI_DEVICE_MODE_MASTER;
-	SPI2handle.SPIConfig.SPI_SclkSpeed = SPI_SCLK_SPEED_DIV8;//generates sclk of 2MHz
-	SPI2handle.SPIConfig.SPI_DFF = SPI_DFF_8BITS;
+	SPI2handle.SPIConfig.SPI_SclkSpeed = SPI_SCLK_SPEED_DIV32;
 	SPI2handle.SPIConfig.SPI_CPOL = SPI_CPOL_LOW;
 	SPI2handle.SPIConfig.SPI_CPHA = SPI_CPHA_LOW;
 	SPI2handle.SPIConfig.SPI_SSM = SPI_SSM_DI; //Hardware slave management enabled for NSS pin
@@ -138,7 +137,7 @@ int main(void)
 	uint8_t dummy_write = 0xff;
 	uint8_t dummy_read;
 
-	initialise_monitor_handles();
+	//initialise_monitor_handles();
 
 	printf("Application is running\n");
 
@@ -183,6 +182,7 @@ int main(void)
 		//do dummy read to clear off the RXNE
 		SPI_ReceiveData(SPI2,&dummy_read,1);
 
+
 		//Send some dummy bits (1 byte) fetch the response from the slave
 		SPI_SendData(SPI2,&dummy_write,1);
 
@@ -196,9 +196,14 @@ int main(void)
 
 			//send arguments
 			SPI_SendData(SPI2,args,2);
+			// dummy read
+			SPI_ReceiveData(SPI2,args,2);
 			printf("COMMAND_LED_CTRL Executed\n");
 		}
 		//end of COMMAND_LED_CTRL
+
+
+
 
 		//2. CMD_SENOSR_READ   <analog pin number(1) >
 
@@ -215,6 +220,7 @@ int main(void)
 
 		//do dummy read to clear off the RXNE
 		SPI_ReceiveData(SPI2,&dummy_read,1);
+
 
 		//Send some dummy byte to fetch the response from the slave
 		SPI_SendData(SPI2,&dummy_write,1);
@@ -317,8 +323,16 @@ int main(void)
 			//send arguments
 			SPI_SendData(SPI2,args,1); //sending length
 
+			//do dummy read to clear off the RXNE
+			SPI_ReceiveData(SPI2,&dummy_read,1);
+
+			delay();
+
 			//send message
-			SPI_SendData(SPI2,message,args[0]);
+			for(int i = 0 ; i < args[0] ; i++){
+				SPI_SendData(SPI2,&message[i],1);
+				SPI_ReceiveData(SPI2,&dummy_read,1);
+			}
 
 			printf("COMMAND_PRINT Executed \n");
 
@@ -357,14 +371,11 @@ int main(void)
 				SPI_ReceiveData(SPI2,&id[i],1);
 			}
 
-			id[11] = '\0';
+			id[10] = '\0';
 
 			printf("COMMAND_ID : %s \n",id);
 
 		}
-
-
-
 
 		//lets confirm SPI is not busy
 		while( SPI_GetFlagStatus(SPI2,SPI_BUSY_FLAG) );
