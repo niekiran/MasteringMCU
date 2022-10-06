@@ -164,7 +164,20 @@ void I2C_PeriClockControl(I2C_RegDef_t *pI2Cx, uint8_t EnorDi)
 	}
 	else
 	{
-		//TODO
+		//TODO: Disbale the peripheral using macros = turning off the clocking!
+		switch((uint32_t)pI2Cx)
+		{
+			case (uint32_t)I2C1:
+				I2C1_PCLK_DI();
+				break;
+			case (uint32_t)I2C2:
+				I2C2_PCLK_DI();
+				break;
+			case (uint32_t)I2C3:
+				I2C3_PCLK_DI();
+			default:
+				break;
+		}
 	}
 
 }
