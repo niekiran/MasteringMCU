@@ -340,14 +340,33 @@ typedef struct
 #define SYSCFG_PCLK_EN() (RCC->APB2ENR |= (1 << 14))
 
 
-/*
- * Clock Disable Macros for GPIOx peripherals
+/* 
+ * CLOCK DISABLE MACROS FOR GPIO PERIPHERALS 
  */
-#define GPIOA_PCLK_DI()
 
-/*
- * Clock Disable Macros for SPIx peripherals
+#define GPIOA_PCLK_DI()			(RCC->AHB1_ENR &= ~(1 << 0))
+#define GPIOB_PCLK_DI()			(RCC->AHB1_ENR &= ~(1 << 1))
+#define GPIOC_PCLK_DI()			(RCC->AHB1_ENR &= ~(1 << 2))
+#define GPIOD_PCLK_DI()			(RCC->AHB1_ENR &= ~(1 << 3))
+#define GPIOE_PCLK_DI()			(RCC->AHB1_ENR &= ~(1 << 4))
+#define GPIOH_PCLK_DI()			(RCC->AHB1_ENR &= ~(1 << 7))
+
+/* 
+ * CLOCK DISABLE MACROS FOR I2C PERIPHERLAS 
  */
+#define I2C1_PCLK_DI()			(RCC->APB1_ENR &= ~(1 << 21))
+#define I2C2_PCLK_DI()			(RCC->APB1_ENR &= ~(1 << 22))
+#define I2C3_PCLK_DI()			(RCC->APB1_ENR &= ~(1 << 23))
+
+/* 
+ * CLOCK DISABLE MACROS FOR SPI PERIPHERLAS 
+ */
+ #define SPI1_PCLK_DI()         (RCC->APB2_ENR &= ~(1 << 12))
+ #define SPI2_PCLK_DI()         (RCC->APB1_ENR &= ~(1 << 14))
+ #define SPI3_PCLK_DI()         (RCC->APB1_ENR &= ~(1 << 15))
+ #define SPI4_PCLK_DI()         (RCC->APB2_ENR &= ~(1 << 13))
+ #define SPI5_PCLK_DI()         (RCC->APB2_ENR &= ~(1 << 20))
+
 
 /*
  * Clock Disable Macros for USARTx peripherals
@@ -358,6 +377,7 @@ typedef struct
  * Clock Disable Macros for SYSCFG peripheral
  */
 
+#define SYSCFG_PCLK_DI()		(RCC->APB2_ENR &= ~(1 << 14))
 
 /*
  *  Macros to reset GPIOx peripherals
