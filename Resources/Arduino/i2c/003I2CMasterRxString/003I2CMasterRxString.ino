@@ -8,7 +8,7 @@ int LED = 13;
 uint8_t rcv_buf[32];
 
 int data_len=0;
-#define SLAVE_ADDR 0x69
+#define SLAVE_ADDR 0x68
 
 void setup() {
     Serial.begin(9600);
