@@ -99,6 +99,9 @@ void GPIO_Init(GPIO_Handle_t *pGPIOHandle)
 
 	}else
 	{
+	        //Configure GPIO as input
+		pGPIOHandle->pGPIOx->MODER &= ~( 0x3 << (2 * pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber));
+		
 		//this part will code later . ( interrupt mode)
 		if(pGPIOHandle->GPIO_PinConfig.GPIO_PinMode ==GPIO_MODE_IT_FT )
 		{
