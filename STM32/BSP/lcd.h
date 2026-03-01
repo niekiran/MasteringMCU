@@ -1,3 +1,7 @@
+/******************************************************************************
+ * Copyright (c) 2026 Bharati Software (FastBit Embedded Brain Academy)
+ * Licensed for use, modification, and distribution.
+ ******************************************************************************/
 
 #ifndef LCD_H_
 #define LCD_H_

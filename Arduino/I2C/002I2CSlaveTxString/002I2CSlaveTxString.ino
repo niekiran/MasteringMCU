@@ -1,3 +1,8 @@
+/******************************************************************************
+ * Copyright (c) 2026 Bharati Software (FastBit Embedded Brain Academy)
+ * Licensed for use, modification, and distribution.
+ ******************************************************************************/
+
 // Wire Slave Transmitter and receiver
 // Uno, Ethernet A4 (SDA), A5 (SCL)
 #include <Wire.h>

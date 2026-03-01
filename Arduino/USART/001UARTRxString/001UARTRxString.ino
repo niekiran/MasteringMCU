@@ -1,4 +1,7 @@
-
+/******************************************************************************
+ * Copyright (c) 2026 Bharati Software (FastBit Embedded Brain Academy)
+ * Licensed for use, modification, and distribution.
+ ******************************************************************************/
 
 void setup() {
   Serial.begin(115200);

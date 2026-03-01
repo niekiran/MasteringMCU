@@ -1,3 +1,8 @@
+/******************************************************************************
+ * Copyright (c) 2026 Bharati Software (FastBit Embedded Brain Academy)
+ * Licensed for use, modification, and distribution.
+ ******************************************************************************/
+
 #include "stm32f407xx_rcc_driver.h"
 
 uint16_t AHB_PreScaler[8] = {2, 4, 8, 16, 64, 128, 256, 512};

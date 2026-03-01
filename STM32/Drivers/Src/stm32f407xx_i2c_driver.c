@@ -1,3 +1,8 @@
+/******************************************************************************
+ * Copyright (c) 2026 Bharati Software (FastBit Embedded Brain Academy)
+ * Licensed for use, modification, and distribution.
+ ******************************************************************************/
+
 #include "stm32f407xx_i2c_driver.h"
 
 static void I2C_GenerateStartCondition(I2C_RegDef_t *pI2Cx);

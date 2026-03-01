@@ -1,3 +1,7 @@
+/******************************************************************************
+ * Copyright (c) 2026 Bharati Software (FastBit Embedded Brain Academy)
+ * Licensed for use, modification, and distribution.
+ ******************************************************************************/
 
 #include <stdio.h>
 #include "ds1307.h"

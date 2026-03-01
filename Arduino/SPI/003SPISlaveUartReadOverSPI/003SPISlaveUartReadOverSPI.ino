@@ -1,3 +1,8 @@
+/******************************************************************************
+ * Copyright (c) 2026 Bharati Software (FastBit Embedded Brain Academy)
+ * Licensed for use, modification, and distribution.
+ ******************************************************************************/
+
 #include <SPI.h>
 
 #define MAX_LEN 500

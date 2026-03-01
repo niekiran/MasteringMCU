@@ -1,3 +1,8 @@
+/******************************************************************************
+ * Copyright (c) 2026 Bharati Software (FastBit Embedded Brain Academy)
+ * Licensed for use, modification, and distribution.
+ ******************************************************************************/
+
 #ifndef STM32F446X_UART_DRIVER_H_
 #define STM32F446X_UART_DRIVER_H_
 

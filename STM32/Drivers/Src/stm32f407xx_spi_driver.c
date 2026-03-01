@@ -1,3 +1,8 @@
+/******************************************************************************
+ * Copyright (c) 2026 Bharati Software (FastBit Embedded Brain Academy)
+ * Licensed for use, modification, and distribution.
+ ******************************************************************************/
+
 #include "stm32f407xx_spi_driver.h"
 
 static void spi_txe_interrupt_handle(SPI_Handle_t *pSPIHandle);

@@ -1,3 +1,7 @@
+/******************************************************************************
+ * Copyright (c) 2026 Bharati Software (FastBit Embedded Brain Academy)
+ * Licensed for use, modification, and distribution.
+ ******************************************************************************/
 
 /*
  * This application receives and prints the user message received from the Arduino peripheral in SPI interrupt mode
