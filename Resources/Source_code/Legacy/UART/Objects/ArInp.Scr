@@ -1,5 +1,0 @@
---create .\Objects\uartdebug.lib
-.\objects\uart_main.o
-.\objects\uart_debug.o
-.\objects\hal_uart_driver.o
-.\objects\hal_gpio_driver.o
